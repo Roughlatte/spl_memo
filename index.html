@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>編成メモ</title>
 <style>
-/* CSS部分は元のままなので、可読性のためにここでは省略します。そのままお使いください */
 :root{
   --ink-navy:#161629; --ink-navy-2:#1f2038; --card:#262844; --card-2:#2e3050;
   --lime:#dcff3c; --pink:#ff3f7f; --orange:#ff8a3d; --cyan:#3ce6ff;
@@ -15,6 +14,15 @@ body{
   margin:0; background: radial-gradient(circle at 8% 0%, rgba(220,255,60,0.10), transparent 40%), radial-gradient(circle at 95% 10%, rgba(255,63,127,0.12), transparent 45%), var(--ink-navy);
   color:var(--text); font-family:"Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic",system-ui,sans-serif; min-height:100vh; padding:20px 14px 60px;
 }
+/* パスワード画面用のスタイル */
+#lockScreen {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: var(--ink-navy); z-index: 9999; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; padding: 20px;
+}
+#lockScreen input { max-width: 300px; text-align: center; margin-bottom: 12px; }
+#lockScreen button { background: var(--lime); color: var(--ink-navy); }
+
 .wrap{max-width:900px;margin:0 auto;}
 header{position:relative;margin-bottom:22px;padding:6px 6px 6px;}
 .splat{ position:absolute; top:-10px; left:-8px; width:60px; height:60px; background:var(--lime); clip-path: path('M48 0 C60 4 58 20 72 18 C90 16 96 34 84 42 C96 48 90 66 74 62 C78 78 60 82 50 70 C40 84 20 78 22 62 C6 66 0 48 14 40 C0 32 6 14 22 18 C22 4 38 -4 48 0 Z'); opacity:.55; z-index:0; }
@@ -23,7 +31,7 @@ h1{ position:relative; z-index:1; font-size:26px; font-weight:900; letter-spacin
 .panel{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:16px; margin-bottom:16px; }
 .panel h2{ font-size:13px; color:var(--cyan); letter-spacing:.08em; margin:0 0 10px; text-transform:uppercase; font-weight:800; }
 .chiprow{display:flex; flex-wrap:wrap; gap:8px;}
-.chip{ border:1.5px solid var(--border); background:var(--ink-navy-2); color:var(--text); padding:7px 14px; border-radius999px; font-size:13.5px; font-weight:700; cursor:pointer; transition:.12s; user-select:none; }
+.chip{ border:1.5px solid var(--border); background:var(--ink-navy-2); color:var(--text); padding:7px 14px; border-radius:999px; font-size:13.5px; font-weight:700; cursor:pointer; transition:.12s; user-select:none; }
 .chip:hover{border-color:var(--cyan);}
 .chip.active{ background:var(--lime); color:var(--ink-navy); border-color:var(--lime); box-shadow:0 2px 0 rgba(0,0,0,.25); }
 .chip.active.rule-active{background:var(--pink); color:#fff; border-color:var(--pink);}
@@ -31,8 +39,8 @@ h1{ position:relative; z-index:1; font-size:26px; font-weight:900; letter-spacin
 @media(min-width:560px){.grid4{grid-template-columns:repeat(4,1fr);}}
 .slot{display:flex; flex-direction:column; gap:4px;}
 .slot label{font-size:11.5px; color:var(--muted); font-weight:800;}
-input[type=text]{ background:var(--ink-navy-2); border:1.5px solid var(--border); color:var(--text); border-radius:8px; padding:9px 10px; font-size:14px; width:100%; }
-input[type=text]:focus{outline:none; border-color:var(--cyan);}
+input[type=text], input[type=password]{ background:var(--ink-navy-2); border:1.5px solid var(--border); color:var(--text); border-radius:8px; padding:9px 10px; font-size:14px; width:100%; }
+input[type=text]:focus, input[type=password]:focus{outline:none; border-color:var(--cyan);}
 .memo{margin-top:12px;}
 .row-btns{display:flex; gap:10px; margin-top:16px; align-items:center;}
 button{ border:none; border-radius:10px; padding:10px 18px; font-weight:800; font-size:14px; cursor:pointer; transition:.12s; font-family:inherit; }
@@ -54,6 +62,7 @@ button{ border:none; border-radius:10px; padding:10px 18px; font-weight:800; fon
 .tags{display:flex; gap:6px; flex-wrap:wrap;}
 .tag{ font-size:11.5px; font-weight:800; padding:3px 10px; border-radius:999px; }
 .tag.stage{background:rgba(60,230,255,.15); color:var(--cyan); border:1px solid rgba(60,230,255,.4);}
+.tag.rule覆い{background:rgba(255,63,127,.15); color:var(--pink); border:1px solid rgba(255,63,127,.4);}
 .tag.rule{background:rgba(255,63,127,.15); color:var(--pink); border:1px solid rgba(255,63,127,.4);}
 .card-actions{display:flex; gap:6px;}
 .iconbtn{ background:transparent; border:1.5px solid var(--border); color:var(--muted); padding:4px 10px; font-size:12px; font-weight:700; border-radius:8px; }
@@ -87,11 +96,19 @@ table.matrix td{ border-top:1px solid var(--border); border-left:1px solid var(-
 </style>
 </head>
 <body>
-<div class="wrap">
+
+<div id="lockScreen">
+  <div style="font-size: 24px; font-weight: 900; margin-bottom: 20px; color: var(--lime);">🔒 合言葉を入力してね</div>
+  <input type="password" id="passInput" placeholder="パスワード">
+  <button id="loginBtn">解除する</button>
+  <div id="lockMsg" style="color: var(--pink); font-size: 13px; margin-top: 10px; font-weight: 700;"></div>
+</div>
+
+<div class="wrap" id="mainContent" style="display:none;">
   <header>
     <div class="splat"></div>
     <h1>編成メモ</h1>
-    <div class="sub">【オンライン同期版】ステージ×ルールで4人の武器編成を記録・編集・検索</div>
+    <div class="sub">ステージ×ルールで4人の武器編成を記録・編集・検索</div>
   </header>
  
   <div class="panel" id="formPanel">
@@ -142,7 +159,10 @@ table.matrix td{ border-top:1px solid var(--border); border-left:1px solid var(-
 </div>
  
 <script>
-// ⚠️ 2の手順で取得する「ウェブアプリのURL」をここに貼り付けてください
+// 🔑 設定：4人で共有する「合言葉」をここに入力してください
+const PASSWORD = "yb";
+
+// ⚠️ Apps Scriptのデプロイで取得した「ウェブアプリのURL」をここに貼り付けてください
 const API_URL = "https://script.google.com/macros/s/AKfycbyRJXLnMMa6LnHqZzIZlqaYMgWYi0oUs0I-3Hl8PZ_Hp7sy37R63wsUYBYkcxs57GVw/exec";
  
 const STAGES = ["オヒョウ","チョウザメ","ナンプラー","カジキ","海女美","ヤガラ","マンタ","ザトウ"];
@@ -154,30 +174,40 @@ let editingId = null;
 let formStage = null; let formRule = null;
 let filterStage = null; let filterRule = null;
 let viewMode = "card";
+
+// パスワード認証の処理
+document.getElementById("loginBtn").onclick = function() {
+  const input = document.getElementById("passInput").value;
+  if (input === PASSWORD) {
+    document.getElementById("lockScreen").style.display = "none";
+    document.getElementById("mainContent").style.display = "block";
+    loadAll(); // パスワードが合っていたらデータを読み込む
+  } else {
+    document.getElementById("lockMsg").textContent = "合言葉が違います！";
+  }
+};
+// Enterキーでも解除できるようにする
+document.getElementById("passInput").onkeydown = function(e) {
+  if (e.key === "Enter") document.getElementById("loginBtn").click();
+};
  
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
  
-// サーバー（Googleスプレッドシート）にデータを保存する
 async function persist(){
   if(!API_URL || API_URL.includes("ここに")){
-    console.warn("API_URLが設定されていません。ローカルで仮保存します。");
     localStorage.setItem("compositions_backup", JSON.stringify(records));
     return;
   }
   document.getElementById("formMsg").textContent = "通信中...";
   try{
-    await fetch(API_URL, {
-      method: "POST",
-      body: JSON.stringify(records)
-    });
+    await fetch(API_URL, { method: "POST", body: JSON.stringify(records) });
     document.getElementById("formMsg").textContent = "同期完了！";
   }catch(e){
-    console.error("保存エラー", e);
-    document.getElementById("formMsg").textContent = "保存に失敗しました(通信エラー)";
+    console.error(e);
+    document.getElementById("formMsg").textContent = "保存に失敗しました";
   }
 }
  
-// サーバーから最新のデータを読み込む
 async function loadAll(){
   const area = document.getElementById("listArea");
   if(!API_URL || API_URL.includes("ここに")){
@@ -189,8 +219,8 @@ async function loadAll(){
     const res = await fetch(API_URL);
     records = await res.json();
   }catch(e){
-    console.error("読み込みエラー", e);
-    area.innerHTML = '<div class="empty">データの取得に失敗しました。URLを確認してください。</div>';
+    console.error(e);
+    area.innerHTML = '<div class="empty">データの取得に失敗しました。</div>';
     return;
   }
   renderList();
@@ -261,15 +291,9 @@ function loadIntoForm(rec){
  
 async function saveRecord(){
   const msg = document.getElementById("formMsg");
-  if(!formStage || !formRule){
-    msg.textContent = "ステージとルールを選んでください";
-    return;
-  }
+  if(!formStage || !formRule){ msg.textContent = "ステージとルールを選んでください"; return; }
   const weapons = [0,1,2,3].map(i=>document.getElementById("wpn"+i).value.trim());
-  if(weapons.every(w=>!w)){
-    msg.textContent = "武器を最低1つ入力してください";
-    return;
-  }
+  if(weapons.every(w=>!w)){ msg.textContent = "武器を最低1つ入力してください"; return; }
   const memo = document.getElementById("memoInput").value.trim();
  
   if(editingId){
@@ -317,7 +341,7 @@ function renderList(){
  
   if(viewMode==="table"){ area.appendChild(renderMatrix()); return; }
   if(filtered.length===0){
-    area.innerHTML = `<div class="empty">${records.length===0 ? "まだ記録がありません。上のフォームから追加してください。" : "条件に一致する記録がありません。"}</div>`;
+    area.innerHTML = `<div class="empty">${records.length===0 ? "まだ記録がありません。" : "条件に一致する記録がありません。"}</div>`;
     return;
   }
   area.appendChild(renderCards(filtered));
@@ -398,8 +422,6 @@ function renderMatrix(){
     tbody.appendChild(tr);
   });
   table.appendChild(tbody); wrap.appendChild(table); holder.appendChild(wrap);
-  const hint = document.createElement("div"); hint.className = "matrixhint"; hint.textContent = "同じマスに複数の記録がある場合は最新の1件だけを表示します。すべて見るにはカード表示で絞り込んでください。";
-  holder.appendChild(hint);
   return holder;
 }
  
@@ -409,7 +431,7 @@ document.getElementById("clearFilterBtn").onclick = ()=>{ filterStage = null; fi
 document.getElementById("viewCardBtn").onclick = ()=>{ viewMode = "card"; document.getElementById("viewCardBtn").classList.add("active"); document.getElementById("viewTableBtn").classList.remove("active"); renderList(); };
 document.getElementById("viewTableBtn").onclick = ()=>{ viewMode = "table"; document.getElementById("viewTableBtn").classList.add("active"); document.getElementById("viewCardBtn").classList.remove("active"); renderList(); };
  
-buildWeaponInputs(); renderFormChips(); renderFilterChips(); loadAll();
+buildWeaponInputs(); renderFormChips(); renderFilterChips();
 </script>
 </body>
 </html>
