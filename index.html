@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>編成メモ</title>
 <style>
 :root{
@@ -93,6 +94,17 @@ table.matrix td{ border-top:1px solid var(--border); border-left:1px solid var(-
 .matrixhint{font-size:11px; color:var(--muted); margin-top:10px;}
 .empty{color:var(--muted); font-size:13.5px; text-align:center; padding:30px 10px;}
 .loading{color:var(--muted); text-align:center; padding:20px; font-size:13px;}
+
+/* 👇 スマホ画面（幅559px以下）用の見え方調整を追加 */
+@media(max-width:559px){
+  body { padding: 12px 8px 40px; }
+  h1 { font-size: 22px; padding: 5px 12px; }
+  .panel { padding: 12px; border-radius: 12px; }
+  .chip { padding: 6px 12px; font-size: 13px; }
+  input[type=text], input[type=password] { font-size: 16px; padding: 8px; }
+  .card { padding: 10px 12px; }
+  .wslot { font-size: 12.5px; }
+}
 </style>
 </head>
 <body>
